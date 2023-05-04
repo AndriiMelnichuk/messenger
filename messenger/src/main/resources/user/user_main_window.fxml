@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="user.main_window_controller">
+   <children>
+      <Label layoutX="399.0" layoutY="108.0" text="Перечень пользователей" />
+      <Label layoutX="383.0" layoutY="20.0" text="Вы вошли под пользователем" />
+      <TextField fx:id="UserName" layoutX="393.0" layoutY="61.0" />
+      <Label layoutX="99.0" layoutY="20.0" text="Разговор пользователей" />
+      <TextField fx:id="writeMessage" layoutX="14.0" layoutY="464.0" prefHeight="31.0" prefWidth="243.0" promptText="Текст" />
+      <Button fx:id="SayMessage" layoutX="269.0" layoutY="464.0" mnemonicParsing="false" text="Отправить" />
+      <ListView fx:id="UsersList" layoutX="380.0" layoutY="132.0" prefHeight="399.0" prefWidth="200.0" />
+      <ListView fx:id="messages" layoutX="23.0" layoutY="60.0" prefHeight="391.0" prefWidth="286.0" />
+   </children>
+</AnchorPane>
