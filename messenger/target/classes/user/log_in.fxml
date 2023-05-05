@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="user.log_in_controller">
+   <children>
+      <Label layoutX="129.0" layoutY="35.0" text="Добро пожаловать">
+         <font>
+            <Font name="Times New Roman" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="log_inField" layoutX="112.0" layoutY="75.0" prefHeight="31.0" prefWidth="177.0" promptText="Логин" />
+      <TextField layoutX="112.0" layoutY="126.0" prefHeight="31.0" prefWidth="177.0" promptText="Пароль" />
+      <Button layoutX="107.0" layoutY="185.0" mnemonicParsing="false" onAction="#Log_In" prefHeight="31.0" prefWidth="187.0" text="Войти" />
+      <Button layoutX="107.0" layoutY="231.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="187.0" text="Регистрация" />
+   </children>
+</AnchorPane>

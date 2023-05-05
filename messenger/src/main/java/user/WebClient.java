@@ -3,9 +3,6 @@ package user;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-
 import java.net.URI;
 import java.util.Vector;
 
@@ -14,21 +11,50 @@ import java.util.Vector;
 
 public class WebClient extends WebSocketClient{
     
-    private main_window_controller myMain_window_controller;
-    private String userName;
-    private Vector<String> users;
     
-    public String[] getMessages(){
+    private String userName;
+    
+    public void SayMessage(String address, String message){
+        String mes = "<Message> "+ "<add> " + address + " </add> " + "<mes> " + message + " </mes> " + "</Message>";
+        send(mes);
+    }
+    
+    public void NewMessage(String message){
+        String[] arrString = message.split(" ");
+        Vector<String> myVector = new Vector<String>();
+        for (int i=0; i!=arrString.length; i++){
+            myVector.add(arrString[i]);
+        }
+        String user = "";
+        int b = myVector.indexOf("</User>");
+        
+        for(int i = 2; i!=b; i++){
+            if (i==2)
+                user += myVector.get(i);
+            else 
+                user += (" " + myVector.get(i));
+        }
+        for(int i = 0; i!=b; i++){
+            myVector.remove(0);
+        }
 
-        String[] a = {"hi"};
-        return a;
+        
+        String mes = "";
+        b = myVector.indexOf("</mes>");
+        for(int i = 2; i!=b; i++){
+            if (i==1)
+                mes += myVector.get(i);
+            else 
+                mes += (" " + myVector.get(i));
+        }
+        transfer.NewMessage(user,mes);
+        
     }
 
-    public WebClient(URI uri, String Name, main_window_controller mc){
+
+    public WebClient(URI uri){
         super(uri);
-        myMain_window_controller = mc;
-        userName = Name;
-        users = new Vector<>();
+        userName = transfer.GetName();
     }
     
     private void setNewUser(String message){
@@ -54,9 +80,7 @@ public class WebClient extends WebSocketClient{
             for(int i = 0; i!=b-1; i++){
                 myVector.remove(0);
             }
-            users.add(user);
-            myMain_window_controller.AddInUsers(user);
-            
+            transfer.AddUser(user);
         }
     }
 
@@ -75,8 +99,7 @@ public class WebClient extends WebSocketClient{
                 user += (" " + myVector.get(i));
         }
 
-        users.remove(user);
-        myMain_window_controller.DeleteUser(user);
+        transfer.DeleteUser(user);
     }
 
     @Override
@@ -84,7 +107,7 @@ public class WebClient extends WebSocketClient{
         // Добавь отпавку сообщения (ПОЛЬЗОВАТЕЛЬ ВОШЕЛ В СЕТЬ ПОД ИМЕНЕМ...)
         System.out.println("Connection opened");
 
-        String request = "<userName> "+userName+" </userName> "+"<request> "+"LogIn"+" </request>";
+        String request = "<LogIn> "+userName+" </LogIn>";
         send(request);
 
     }
@@ -99,6 +122,9 @@ public class WebClient extends WebSocketClient{
             break;
             case "<LogOutUser>":
             LogOutUser(message);
+            break;
+            case "<NewMes>":
+            NewMessage(message);
             break;
         }
     }
