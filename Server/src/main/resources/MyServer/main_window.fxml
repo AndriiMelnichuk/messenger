@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MyServer.main_controller">
+   <children>
+      <Label layoutX="425.0" layoutY="41.0" text="Перечень чатов" />
+      <Label layoutX="99.0" layoutY="41.0" text="Разговор пользователей" />
+      <ListView fx:id="ChatsList" layoutX="380.0" layoutY="74.0" prefHeight="457.0" prefWidth="200.0" />
+      <ListView fx:id="messages" layoutX="11.0" layoutY="74.0" prefHeight="457.0" prefWidth="346.0" />
+   </children>
+</AnchorPane>

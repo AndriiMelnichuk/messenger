@@ -1,5 +1,6 @@
 package user;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -22,22 +23,22 @@ public class main_window_controller implements Initializable{
     private TextField UserName;
     @FXML
     private TextField writeMessage;
+    @FXML
+    private TextField companion;
     private String CurrentUser;
-    public void SayMessage(ActionEvent act){
-        if (!(writeMessage.getText().equals("")) && CurrentUser != null){
-            messages.getItems().add("Вы: "+ writeMessage.getText());
-            transfer.SayMessage(CurrentUser,writeMessage.getText());
+    public void SayMessage(ActionEvent act) throws IOException{
+        if (!(writeMessage.getText().trim().equals("")) && CurrentUser != null){
+            messages.getItems().add("Вы: "+ writeMessage.getText().trim());
+            transfer.SayMessage(CurrentUser,writeMessage.getText().trim());
             writeMessage.clear();
         }
     }
-    public void NewMessage(String user, String mes){
-        if (CurrentUser != null)
-            if (CurrentUser.equals(user))
-                messages.getItems().add(mes);
-        
+    public void NewMessage(String user, String mes){    
+        if (CurrentUser != null && CurrentUser.equals(user))
+            messages.getItems().add(mes);
     }
     public void AddUsers(String obj){
-        UsersList.getItems().add(obj);        
+        UsersList.getItems().add(obj);
     }
     public void addMessage(String obj){
         messages.getItems().add(obj);
@@ -45,12 +46,18 @@ public class main_window_controller implements Initializable{
     public void DeleteUser(String obj){
         UsersList.getItems().remove(obj);
     }
-    public void SetName(String name){
-        UserName.setText(name);
-        UserName.setEditable(false);
+    public void online(String user){
+        if (companion.getText().equals(user))
+            companion.setText(user+" (В сети)");
+    }
+    public void offlien(String user){
+        if (companion.getText().equals(user+" (В сети)"))
+            companion.setText(user);
     }
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
+        transfer.setContr2(this);
+        UserName.setText(transfer.GetName());
         String[] a = {};
         UsersList.getItems().addAll(a);
         UsersList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -59,7 +66,12 @@ public class main_window_controller implements Initializable{
             CurrentUser = UsersList.getSelectionModel().getSelectedItem();
             messages.getItems().clear();
             transfer.setAllMessages(CurrentUser);
+            if (transfer.isOnline(CurrentUser))
+                companion.setText(CurrentUser + " (В сети)");
+            else 
+            companion.setText(CurrentUser);
             }  
         });
     }
+
 }

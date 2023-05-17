@@ -1,37 +1,32 @@
-package user;
+package MyServer;
+
+
+import java.io.IOException;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javafx.event.EventHandler;
 import javafx.stage.WindowEvent;
 
-/**
- * JavaFX App
- */
-public class App extends Application {
-
+public class App extends Application{
     private static Scene scene;
-
+    
     @Override
-    public void start(Stage stage) throws IOException, URISyntaxException {
-        scene = new Scene(loadFXML("log_in"));
-        
+    public void start(Stage stage) throws Exception{
+        transfer.startServer();
+        scene = new Scene(loadFXML("main_window"));
         stage.setScene(scene);
         // Закрываем сокет при закрытии приложения
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
-            System.out.println("Stage is closing");
-            transfer.CloseConnection();
+            try {
+                transfer.stopServer();
+            } catch (InterruptedException e) {}
             }
             });
-        transfer.setWebSocket();
         stage.show();
     }
 
@@ -44,8 +39,7 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
-    public static void main(String[] args) {
-        launch();
+    public static void main(String[] args) throws InterruptedException {
+        launch(args);
     }
-
 }

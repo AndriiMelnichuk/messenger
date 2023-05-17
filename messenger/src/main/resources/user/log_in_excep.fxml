@@ -15,7 +15,7 @@
       <TextField fx:id="log_inField" layoutX="100.0" layoutY="134.0" prefHeight="31.0" prefWidth="400.0" promptText="Логин" />
       <TextField fx:id="passwordField" layoutX="101.0" layoutY="179.0" prefHeight="31.0" prefWidth="400.0" promptText="Пароль" />
       <Button layoutX="207.0" layoutY="321.0" mnemonicParsing="false" onAction="#Log_In" prefHeight="31.0" prefWidth="187.0" text="Войти" />
-      <Button layoutX="206.0" layoutY="367.0" mnemonicParsing="false" onAction="#Sign_in" prefHeight="31.0" prefWidth="187.0" text="Регистрация" />
-      <Label fx:id="LException" layoutX="79.0" layoutY="238.0" prefHeight="21.0" prefWidth="400.0" textAlignment="CENTER" />
+      <Button layoutX="206.0" layoutY="367.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="187.0" text="Регистрация" />
+      <Label fx:id="LException" layoutX="107.0" layoutY="236.0" prefHeight="21.0" prefWidth="389.0" text="Логин или пароль не правильный. Попробуйте ещё раз" textAlignment="CENTER" />
    </children>
 </AnchorPane>

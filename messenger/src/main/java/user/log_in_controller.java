@@ -1,56 +1,49 @@
 package user;
 
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-public class log_in_controller {
+public class log_in_controller{
     @FXML
     private TextField log_inField;
-    
-    public void Log_In(ActionEvent act){
-        String login = log_inField.getText();
-        if (!login.equals("")){
-            // Здесь должен быть запрос серверу. Запрашиваем кто в сети (Возможно запрашиваем регистрацию)
-            try{
-                // Замена полотна - переходим на вкладку мессенджера.
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("user_main_window.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage)((Node)act.getSource()).getScene().getWindow();
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                // Настраеваем класс transfer
-                transfer.SetName(login);
-                
-                
-                transfer.Init(this,loader.getController());
-                // Закрываем сокет при закрытии приложения
-                stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                    public void handle(WindowEvent we) {
-                     System.out.println("Stage is closing");
-                     transfer.CloseConnection();
-                     }
-                    });
-                // Здесь добавляем список возможных соединений
-                stage.show();
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-            
-        }
+    @FXML
+    private TextField passwordField;
+    @FXML
+    private Label LException;
+    // trim - удаление лишних пробелов.
 
-        
+    public void Log_In(ActionEvent act) throws URISyntaxException, IOException{
+        transfer.setContr1(this);
+        transfer.ConnectionRestart();
+        transfer.SetName(log_inField.getText().trim());
+        String login = log_inField.getText().trim();
+        String password = passwordField.getText().trim();
+        if (login.equals("") || login.equals(""))
+            mis();
+        else
+            transfer.isValidUser(login, password);
     }
-    public void Sign_in(ActionEvent act){
+    public void Sign_in(ActionEvent act) throws IOException{
+        App.setRoot("sign_in");
+    }
 
+    public void draw() throws IOException{
+        App.setRoot("user_main_window");
+        //transfer.getUsers();
     }
+    public void mis() throws IOException {
+        App.setRoot("log_in_excep");
+    }
+    public void connectionEror() throws IOException {
+        App.setRoot("log_in_coner");
+    }
+
 }

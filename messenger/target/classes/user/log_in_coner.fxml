@@ -16,6 +16,6 @@
       <TextField fx:id="passwordField" layoutX="101.0" layoutY="179.0" prefHeight="31.0" prefWidth="400.0" promptText="Пароль" />
       <Button layoutX="207.0" layoutY="321.0" mnemonicParsing="false" onAction="#Log_In" prefHeight="31.0" prefWidth="187.0" text="Войти" />
       <Button layoutX="206.0" layoutY="367.0" mnemonicParsing="false" onAction="#Sign_in" prefHeight="31.0" prefWidth="187.0" text="Регистрация" />
-      <Label fx:id="LException" layoutX="79.0" layoutY="238.0" prefHeight="21.0" prefWidth="400.0" textAlignment="CENTER" />
+      <Label fx:id="LException" layoutX="140.0" layoutY="240.0" prefHeight="21.0" prefWidth="323.0" text="Проблема с соединением, попробуйте позже" textAlignment="CENTER" />
    </children>
 </AnchorPane>

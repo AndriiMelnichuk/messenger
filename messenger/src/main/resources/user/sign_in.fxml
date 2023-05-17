@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="user.sign_in_controller">
+   <children>
+      <Label layoutX="253.0" layoutY="94.0" text="Регистрация">
+         <font>
+            <Font name="Times New Roman" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="log_inField" layoutX="101.0" layoutY="132.0" prefHeight="31.0" prefWidth="400.0" promptText="Новый логин" />
+      <TextField fx:id="passwordField1" layoutX="101.0" layoutY="185.0" prefHeight="31.0" prefWidth="400.0" promptText="Пароль" />
+      <TextField fx:id="passwordField2" layoutX="101.0" layoutY="233.0" prefHeight="31.0" prefWidth="400.0" promptText="Повторите пароль" />
+      <Button layoutX="206.0" layoutY="367.0" mnemonicParsing="false" onAction="#Sign_in" prefHeight="31.0" prefWidth="187.0" text="Регистрация" />
+      <Label fx:id="LException" layoutX="79.0" layoutY="238.0" prefHeight="21.0" prefWidth="400.0" textAlignment="CENTER" />
+   </children>
+</AnchorPane>

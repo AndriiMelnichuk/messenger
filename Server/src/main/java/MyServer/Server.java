@@ -1,6 +1,8 @@
 package MyServer;
 
 import java.net.InetSocketAddress;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -9,9 +11,8 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 public class Server extends WebSocketServer{
-    //private Vector<String> users;
     private Vector<UserConnections> connections;
-    // Класс контейнер
+    
     private class UserConnections{
         private WebSocket soc;
         private String user;
@@ -26,87 +27,138 @@ public class Server extends WebSocketServer{
             user = b;
         }
     }
-    // Используем для генирации сообщения 
-    private String getUsers(){
-        String ans ="";
-        for(int i=0; i!=connections.size();i++){
-            if (i==0)
-                ans += ("<NewUser> " + connections.elementAt(i).GetUser() + " </NewUser>");
-            else 
-                ans += (" <NewUser> " + connections.elementAt(i).GetUser() + " </NewUser>");
-        }
+
+    // Обработка сообщений
+    @Override
+    public void onMessage(WebSocket conn, String message){
+        String[] arrStrings = message.split(" ");
+        try{
+            switch (arrStrings[0]){
+                case "<LogIn>":
+                    logInHandler(message,conn);
+                break;
+                case "<message>":
+                    messageHandler(message,conn);
+                break;
+                case "<recording>":
+                    recordingHandler(message, conn);
+                break;
+            }
+        }catch(Exception e){}
         
+    }
+    private void logInHandler(String message, WebSocket conn) throws ClassNotFoundException, SQLException {
+        String login = parse("<login>", "</login>", message);
+        String password = parse("<password>", "</password>", message);
+        
+        ResultSet ResSet = DBcontrol.getUser(login, password);
+        int count = 0;
+        while(ResSet.next())
+            count++;
+        if (count == 1){
+            conn.send("<ValidLogInStatus> valid </ValidLogInStatus>");
+            UserConnections us = new UserConnections(conn,login);
+            connections.add(us);
+            sendAllMessageAndUsers(login, conn);
+            }
+        else
+            conn.send("<ValidLogInStatus> invalid </ValidLogInStatus>");
+        
+    }
+    private void messageHandler(String message, WebSocket conn) throws ClassNotFoundException, SQLException{
+        UserConnections user = new UserConnections(null, null);
+        String from = parse("<from>", "</from>", message);
+        String to = parse("<to>", "</to>", message);
+        String text = parse("<text>", "</text>", message);
+        for (int i=0; i!=connections.size();i++)
+            if (connections.elementAt(i).GetUser().equals(to))
+                user = connections.elementAt(i);
+        if (user.getConn() != null){
+            String NewMes = "<NewMessage> <from> " + from + " </from> <text> " + text + " </text> </NewMessage>";
+            user.getConn().send(NewMes);
+        }
+        DBcontrol.addNewMessege(from, to, text);
+        transfer.NewMessage(from,to,text);
+    }
+    private void recordingHandler(String message, WebSocket conn) throws ClassNotFoundException, SQLException {
+        String login = parse("<login>","</login>",message);
+        String password = parse("<password>","</password>",message);
+        ResultSet ResSet = DBcontrol.getUser(login);
+        int counter = 0;
+        String mes;
+        while(ResSet.next()){
+            counter++;
+        }
+        if (counter == 0){
+            mes = "<ValidRecordingStatus> " + "valid" + " </ValidRecordingStatus>";            
+            conn.send(mes);
+            UserConnections us = new UserConnections(conn,login);
+            connections.add(us);
+            DBcontrol.addUser(login, password);
+            sendAllMessageAndUsers(login, conn);
+            for (int i = 0; i!=connections.size(); i++)
+                if (!connections.elementAt(i).getConn().equals(conn))
+                    connections.elementAt(i).getConn().send("<allUsers> <User> "+ login + " </User> </allUsers>");
+        }
+        else{
+            mes = "<ValidRecordingStatus> " + "invalid" + " </ValidRecordingStatus>";
+            conn.send(mes);
+        }
+
+    }
+    
+    // Вспомогательные функции
+    private void sendAllMessageAndUsers(String login,WebSocket conn) throws ClassNotFoundException, SQLException{
+        // Отправка всех пользователей
+        ResultSet ResSet = DBcontrol.getAllUser(login);
+        Vector <String> allUsers = new Vector<String>();
+        while(ResSet.next())
+            allUsers.add(ResSet.getString(1));
+        conn.send(getUsers(allUsers));
+        // Отправка всех сообщений
+        ResSet = DBcontrol.getAllMesseges(login);
+        String NewMes = "<OldMessages> ";
+        while(ResSet.next()){
+            NewMes += "<message> <from> " + ResSet.getString(2) + " </from> <to> " + ResSet.getString(3) + " </to> <text> " + ResSet.getString(4) + " </text> </message> ";
+        }
+        NewMes+= "</OldMessages>";
+        conn.send(NewMes);
+        // Отправка всех пользователей всети
+        for (int i = 0; i != connections.size(); i++ )
+            if (!connections.elementAt(i).GetUser().equals(login)){
+                conn.send("<online> <User> " + connections.elementAt(i).GetUser() + " </User> </online>");
+                connections.elementAt(i).getConn().send("<online> <User> " + login + " </User> </online>");
+            }
+                
+        
+    }
+    private String parse(String from, String to, String message){
+        String[] arrStrings = message.split(" ");
+        int a =  Arrays.asList(arrStrings).indexOf(from);
+        int b =  Arrays.asList(arrStrings).indexOf(to);
+        String res = "";
+        for (int i = a+1; i!=b;i++){
+            if(i==a+1)
+                res += arrStrings[i];
+            else
+                res += (" "+arrStrings[i]);
+        }
+        return res;
+    }
+    private String getUsers(Vector <String> allUsers){
+        String ans ="<allUsers> ";
+        for(int i=0; i!=allUsers.size();i++)
+            if (i==0)
+                ans += ("<User> " + allUsers.elementAt(i) + " </User>");
+            else 
+                ans += (" <User> " + allUsers.elementAt(i) + " </User>");
+        ans += " </allUsers>";
         return ans;
     }
-    // Используем для рассылки сообщений пользователям о входе или выходе.
-    private void UpdateListForAll(UserConnections user, String type){
-        for (int i=0; i!=connections.size();i++)
-            if (type.equals("Add")){
-                if (!connections.elementAt(i).equals(user))
-                    connections.elementAt(i).getConn().send("<NewUser> "+user.GetUser()+" </NewUser>");
-            }else if (type.equals("Remove")){
-                if (!connections.elementAt(i).equals(user))
-                    connections.elementAt(i).getConn().send("<LogOutUser> "+user.GetUser()+" </LogOutUser>");
-            }
-    }
-    
-    private void LogIn(String message, WebSocket conn) {
-        String[] arrStrings = message.split(" ");
-        String user ="";
-        int b = Arrays.asList(arrStrings).indexOf("</LogIn>");
-        for (int i = 1; i!=b;i++){
-            if(i==1)
-                user += arrStrings[i];
-            else
-                user += (" "+arrStrings[i]);
-        }
-        conn.send(getUsers());
-        UserConnections us = new UserConnections(conn,user);
-        connections.add(us);
-        UpdateListForAll(us,"Add");
-    }
-    
-    private void Message(String message, WebSocket conn){
-        UserConnections user = new UserConnections(null, null);
-        String add = "";
-        String mes = "";
-        String name = "";
-        String[] StringArr = message.split(" ");
-        int b = Arrays.asList(StringArr).indexOf("</add>");
-        int a = Arrays.asList(StringArr).indexOf("<mes>");
-        for (int i=0; i!=connections.size();i++)
-            if (connections.elementAt(i).getConn().equals(conn))
-                name = connections.elementAt(i).GetUser();
-        for (int i=2; i!= b; i++)
-            if (i==2)
-                add += StringArr[i];
-            else
-                add += (" " + StringArr[i]);
-        b = Arrays.asList(StringArr).indexOf("</mes>");
-        for (int i = a+1; i!=b; i++)
-            if (i == a+1)
-                mes += StringArr[i];
-            else
-                mes += (" " + StringArr[i]); 
-        for (int i=0; i!=connections.size();i++)
-            if (connections.elementAt(i).GetUser().equals(add))
-                user = connections.elementAt(i);
-        String NewMes = "<NewMes> "+ "<User> " + name + " </User> " + "<mes> " + mes + " </mes> " + "</NewMes>";
-        user.getConn().send(NewMes);
-        
-    }
-    // Методы перегруженные (основные методы сокета)
-    // Ничего не происходит
-    @Override
-    public void onOpen(WebSocket conn, ClientHandshake handshake){
-        // При соединении
-        System.out.println("New connection from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());        
-    }
-    // Оповещаем о закрытии остальных пользователей, удаляем пользователя из памяти
+
+    // Оповещение пользователя о закрытии сокета пользователя
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote){
-        // При закрытии
-        System.out.println("Closed connection to " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
         UserConnections user = new UserConnections(conn,"");
         for(int i=0; i!=connections.size(); i++){
             if (conn.equals(connections.elementAt(i).getConn())){
@@ -114,54 +166,29 @@ public class Server extends WebSocketServer{
                 break;
             }
         }
-        UpdateListForAll(user, "Remove");
+        for (int i=0; i!=connections.size();i++)
+            if (!connections.elementAt(i).equals(user))
+                connections.elementAt(i).getConn().send("<offline> <User> "+user.GetUser()+" </User> </offline>");
         connections.remove(user);
     }
-    /* Парсим сообщение, возможные исходы:
-        GetUsers - запрашивается когда пользователь логинится. Возвращает спикок всех сетевых соединений.
-        LogIn - отправляем всем информацию, что пользователь в сети.
-    */   
-    @Override
-    public void onMessage(WebSocket conn, String message){
-        // При Получении сообщения
-        System.out.println("Received message from " + conn.getRemoteSocketAddress().getAddress().getHostAddress() + ": " + message);
-        String[] arrStrings = message.split(" ");
-        // Выполныем разные действия в зависимости от команды
-        switch (arrStrings[0]){
-            case "<LogIn>":
-            LogIn(message,conn);
-            break;
-            case "<Message>":
-            Message(message,conn);
-            break;
-        }
-        System.out.println();
-    }
-    // Ничего не происходит
+
+    // Пустые функции
     @Override
     public void onError(WebSocket conn, Exception ex){
-        // При Ошибке
-        System.err.println("Error occurred on connection to "+conn.getRemoteSocketAddress().getAddress().getHostAddress() +":"+ex);
     }
-    // Ничего не происходит
-    @Override
-    public void onStart() {
-        // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'onStart'");
-    }
-    // Конструктор
     public Server(int port){
         super(new InetSocketAddress(port));
-        //users = new Vector<String>();
         connections = new Vector<UserConnections>();
     }
- 
-    // Точка входа
-    public static void main(String[] args) throws InterruptedException {
-        int post = 2294;
-        Server server = new Server(post);
-        server.start();
+    @Override
+    public void onStart() {
+        
     }
+    @Override
+    public void onOpen(WebSocket conn, ClientHandshake handshake){
+               
+    }
+
 
 
 }
